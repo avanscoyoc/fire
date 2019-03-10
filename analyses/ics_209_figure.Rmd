@@ -25,7 +25,7 @@ library(stringr)
 
 ```{r}
 #import data
-ics_209 <- read.csv("ICS_209_reports.csv", header = TRUE, stringsAsFactors = FALSE)
+ics_209 <- read.csv("data/ICS_209_reports.csv", header = TRUE, stringsAsFactors = FALSE)
 head(ics_209)
 
 ics_209 <- ics_209 %>% 
@@ -60,7 +60,7 @@ View(ics_209)
 
 ```{r}
 # Import and clean alex data IDs
-GIS <- read.csv("all_fire_data.csv") %>% filter(YEAR_ > 2000 & YEAR_ < 2014) %>% 
+GIS <- read.csv("data/all_fire_data.csv") %>% filter(YEAR_ > 2000 & YEAR_ < 2014) %>% 
   unite("inc", UNIT_ID, INC_NUM, sep = "-") %>% 
   mutate(INC_CLEAN = gsub(" ", "", inc))
 ```
@@ -113,7 +113,7 @@ View(full)
 Millie got 239 fires greater than 10000 acres in her GIS file, SO, we need to import that data table and check what proportion of my data fits hers. 
 
 ```{r}
-shape <- read.csv("fires_millie.csv") %>% 
+shape <- read.csv("data/fires_millie.csv") %>% 
   unique
 
 
