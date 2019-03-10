@@ -195,7 +195,7 @@ fire_data_joined %>%
     ## 38                 DEER                       7474714
     ## 39              Reading                      18000000
 
-\*\* It looks like only 520 rows, only 39 are greater than 10,000 acres, were joined with Alex's dataset.\*\*
+**It looks like only 520 rows, only 39 are greater than 10,000 acres, were joined with Alex's dataset.**
 
 Take a look at the plot of these values and fire sizes below.
 
