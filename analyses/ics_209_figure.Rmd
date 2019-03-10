@@ -18,6 +18,7 @@ output: html_document
 ```{r}
 library(tidyverse)
 library(stringr)
+library(gtools)  #used for smartbind() function
 ```
 
 
@@ -52,7 +53,6 @@ ics_209 <- ics_209 %>%
       mutate(INC_CLEAN = paste0(unit, "-", inc.num)) %>% #merge cleaned numbers 
       #add year column
       mutate(year = str_extract(Start.Date, "[^-]+"))
-View(ics_209)
 ```
 
 
@@ -65,11 +65,10 @@ GIS <- read.csv("data/all_fire_data.csv") %>% filter(YEAR_ > 2000 & YEAR_ < 2014
   mutate(INC_CLEAN = gsub(" ", "", inc))
 ```
 
-
 ## Join to spatial dataset
 
 ```{r}
-# Join data
+# Join datasets and filter to greater than 10,000 acres
 fire_data_joined <- left_join(GIS, ics_209, by = "INC_CLEAN") %>% 
   filter(!is.na(year), GIS_ACRES > 10000) 
 ```
@@ -82,9 +81,19 @@ fire_data_joined %>%
   select(INC_CLEAN,YEAR_, year, GIS_ACRES, Size, FIRE_NAME, Incident.Name, Structures.Destroyed, Costs) 
 ```
 
-** It looks like only 520 rows, only 39 are greater than 10,000 acres, were joined with Alex's dataset. Not sure why this is still happening.**
+** It looks like only 520 rows, only 39 are greater than 10,000 acres, were joined with Alex's dataset.**
 
-Here I create data tables with only GIS data and ICS data that didn't match.  Then I merge them into a table to view what is wrong with the incident numbers.  It seems to be a problem with the GIS incident numbers and the jurisdictions.  There are ~200 additional fires greater than 10000 acres in here that could be partially matched and added to the 39 above.
+Take a look at the plot of these values and fire sizes below.
+
+```{r}
+ggplot(fire_data_joined, aes(x = INC_CLEAN, y = Size)) +
+  geom_bar(stat = "identity", width = 1)
+```
+
+
+## Troubleshooting
+
+To troubleshoot why so many rows didn't match, I create data tables with only GIS data and ICS data that didn't match to examine further. I merge these into a table to view what is wrong with the incident numbers. It seems to be a problem with the GIS incident numbers and the jurisdictions from Alex's dataset.  There are ~100 additional fires greater than 10000 acres in here that could be partially matched and added to the 39 above.
 
 ```{r}
 join_only_gis <- left_join(GIS, ics_209, by = "INC_CLEAN") %>% 
@@ -96,7 +105,6 @@ join_only_ics <- left_join(ics_209, GIS, by = "INC_CLEAN") %>%
   transform(Costs = as.numeric(Costs)) %>%
   transform(Size = as.numeric(Size)) 
 
-library(gtools)
 full <- smartbind(join_only_gis, join_only_ics) %>% 
   select(year, Size, Incident.Name, Start.Date, INC_CLEAN, inc, OBJECTID, Structures.Destroyed, Costs) %>% 
   transform(Size = as.numeric(Size)) %>% 
@@ -104,62 +112,42 @@ full <- smartbind(join_only_gis, join_only_ics) %>%
   transform(Structures.Destroyed = as.integer(Structures.Destroyed)) %>% 
   filter(Size > 10000) 
 
-View(full)
+full
 ```
 
+It is clear from this table that the incident numbers in Alex's data (rows with inc/OBJECTID filled in) don't match the ICS-209 incident numbers (rows with Structures/costs filled in).  Next, we'll need to try some partial matching based on Start.Date, Incident.Name, and Size to see how many more rows we can merge to create a more complete dataset of the cost and structural loss that was associate with the fires greater than 10,000 acres between 2001-2013. 
 
-## Add Millie Data
 
-Millie got 239 fires greater than 10000 acres in her GIS file, SO, we need to import that data table and check what proportion of my data fits hers. 
+## Partial Matching Attempt
+
+**In Progress**
+
+Here, I attempt to match: 
+
+- `Incident.Name` by first 3 characters
+- `Start.Date` within 5 days of eachother
+- `Size` within 1000 acres of eachother
 
 ```{r}
-shape <- read.csv("data/fires_millie.csv") %>% 
-  unique
-
-
+#TBD
 ```
 
 
+## New Merge with Millie Data 
+
+**In Progress**
+
+Millie got 239 fires greater than 10000 acres in her GIS file, SO, we need to import that data table and check what proportion of the ICS-209 data file is contained in it and if we can merge to this data instead. 
 
 ```{r}
-filter <- GIS %>% 
-  transform(GIS_ACRES = as.numeric(GIS_ACRES)) %>% 
-  filter(GIS_ACRES > 10000)
-
-filter2 <- fire_data_joined %>% 
-  filter(!is.na(year) & Size > 10000)
-
-ggplot(filter2, aes(x = INC_CLEAN, y = GIS_ACRES)) +
-  geom_bar(stat = "identity", width = 1)
+shape <- read.csv("data/fires_millie.csv") 
+head(shape)
 ```
 
 
 
-## Example Histogram w/ Joined only
-
-```{r}
-fig_dat <- fire_data_joined %>% 
-  filter(!is.na(year)) #create dataframe with only 520 joined rows & greater than 1000 acres
-
-View(fig_dat)
-
-ggplot(fig_dat, aes(x = INC_CLEAN, y = Size)) +
-  geom_bar(stat = "identity", width = 1)
 
 
-#+
-  ylab("acres burned") +
-  scale_y_continuous(label = scales::comma) +
-  geom_hline(yintercept=100000, linetype="dashed", color = "black") +
-  #geom_text(aes(280,109000,label = "megafire", family="Palatino")) +
-  annotate("text", label = "megafire", x = 160, y = 120000, size = 3, fontface = "bold", family = "Palatino", colour = "black") +
-  scale_fill_manual("", values = c("shrub" = "#34ace0", "forest" = "#33d9b2", "grass" = "#ffb142")) +
-  coord_flip() +
-  theme_classic() +
-  theme(axis.title.y=element_blank(),
-        axis.text.y=element_blank(),
-        axis.ticks.y=element_blank())
-```
 
 
 
