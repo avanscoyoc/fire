@@ -1,8 +1,8 @@
 ---
 title: "ICS 209 Data"
-author: 'Amy Van Scoyoc'
+author: "Amy Van Scoyoc"
 date: "2/20/2019"
-output: html_document
+output: github_document
 ---
 
 ## About ICS 209 Data
