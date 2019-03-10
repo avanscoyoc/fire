@@ -149,7 +149,18 @@ shape <- read.csv("data/fires_millie.csv")
 head(shape)
 ```
 
+KC: Starting by removing duplicates from shape df so we know how many fire over 10,000 acres we're working wit. 
+```{r Cleaning new shape df}
+#need to remove duplicates from new shape data
 
+head(shape)
+#counting instances of duplicates by FIRE_NAME
+n_occur <- data.frame(table(shape$FIRE_NAME))
+n_occur[n_occur$Freq > 1,]
+#Looks like 15 fires in the data set have some form of duplicate
+
+shape[shape$FIRE_NAME %in% n_occur$Var1[n_occur$Freq > 1],]
+```
 
 
 
