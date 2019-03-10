@@ -174,7 +174,10 @@ head(shape)
 n_occur2 <- data.frame(table(shape$FIRE_ID))
 n_occur2[n_occur2$Freq > 1,]
 shape[shape$FIRE_ID %in% n_occur2$Var1[n_occur2$Freq > 1],]
-
+#how best to remove remaining duplicates? 
+shape
+shape_sub <- subset(shape, GIS_ACRES != 281790.88)
+shape_sub
 ```
 
 
