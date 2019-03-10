@@ -1,4 +1,4 @@
-# Fire
+# Fire :fire:
 
 Analysis of historic California fire sizes and cover type. An idea and analysis led by all members of the Brashares Lab. 
 
