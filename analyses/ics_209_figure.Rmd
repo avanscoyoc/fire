@@ -86,7 +86,7 @@ fire_data_joined %>%
   select(INC_CLEAN,YEAR_, year, GIS_ACRES, Size, FIRE_NAME, Incident.Name, Structures.Destroyed, Costs) 
 ```
 
-** It looks like only 520 rows, only 39 are greater than 10,000 acres, were joined with Alex's dataset.**
+**It looks like only 520 rows, only 39 are greater than 10,000 acres, were joined with Alex's dataset.**
 
 Take a look at the plot of these values and fire sizes below.
 
