@@ -181,9 +181,13 @@ shape[shape$FIRE_ID %in% n_occur2$Var1[n_occur2$Freq > 1],]
 #CalFire also has simialr estimates for burned acreage for both of our Thomas_2017 fires. So these two are true duplicates as well. 
 #Not finding any definitive answer on the Mill 2008 fire. The acreage is really different too. I saw on wikipedia that it was listed as being ~13,000 acres, which seems to match one of the entries. But Im not sure where that data soruce came from... There are many Mill/Mill creek fires in different years, so I'm not sure how to work out which one the other is referring to. Maybe throw it/them out? 
 
+#Remove duplicate RANCH 2018 fire
+shape <- shape %>%
+  filter(.,FIRE_ID != "RANCH 2018" | MAPMETHOD != "Mixed Methods")
+#Remove duplicate THOMAS 2017 fire
+shape <- shape %>%
+  filter(., FIRE_ID != "THOMAS 2017" | AGENCY != "C&L")
 shape
-#shape_sub <- shape[$GIS_ACRES = 410202.46]
-
 ```
 
 
