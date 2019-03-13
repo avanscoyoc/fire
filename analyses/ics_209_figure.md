@@ -61,29 +61,29 @@ head(ics_209)
 
 ``` r
 ics_209 <- ics_209 %>% 
-      ##filter and clean all data
-      filter(Incident.Name != "Incident Name") %>%  #remove header rows from sheet 
-      map_dfr(str_trim) %>%     #trim all the white space
-      #as.data.frame() %>%   #for old way I mapped trimming white space, ignore
-      filter(Incident.Number != "") %>% #remove rows without incident numbers
-      filter(!str_detect(Incident.Number, "^HI")) %>% #remove Hawaii data
-      filter(Latitude != "") %>% #remove duplicate rows with personnel names
-      ##format rows
-      transform(Start.Date = as.Date(Start.Date, format = "%m/%d/%Y")) %>% 
-      transform(Controlled.Date = as.Date(Controlled.Date, format = "%m/%d/%Y")) %>% 
-      transform(Costs = as.numeric(gsub("[\\$,]", "", Costs))) %>%
-      transform(Size = as.numeric(gsub("[\\ACRES,]", "", Size))) %>% 
-      ##cleaning incident number col
-      transform(Incident.Number = gsub(" ", "-", Incident.Number)) %>% #substitute white space for dash
-      transform(Incident.Number = gsub("--", "-", Incident.Number)) %>% #remove any double dash instances
-      transform(Incident.Number = gsub("CA-","", Incident.Number)) %>% #remove CAs from incident num.
-      #transform(Incident.Number = gsub("^([A-Z]{3})([0-9]+)$", "-", Incident.Number)) %>%  #add dash ids (not working)
-      mutate(unit = str_extract(Incident.Number, "[A-Z]+")) %>%  #extract unit from incident num.
-      mutate(inc.num = str_extract(Incident.Number, "[^-]+$")) %>% #extract unit numbers
-      transform(inc.num = formatC(as.numeric(inc.num), width = 8, format = "d", flag = "0")) %>% #pad to 8 digits
-      mutate(INC_CLEAN = paste0(unit, "-", inc.num)) %>% #merge cleaned numbers 
-      #add year column
-      mutate(year = str_extract(Start.Date, "[^-]+"))
+  ##filter and clean all data
+  filter(Incident.Name != "Incident Name") %>%  #remove header rows from sheet 
+  map_dfr(str_trim) %>%     #trim all the white space
+  #as.data.frame() %>%   #for old way I mapped trimming white space, ignore
+  filter(Incident.Number != "") %>% #remove rows without incident numbers
+  filter(!str_detect(Incident.Number, "^HI")) %>% #remove Hawaii data
+  filter(Latitude != "") %>% #remove duplicate rows with personnel names
+  ##format rows
+  transform(Start.Date = as.Date(Start.Date, format = "%m/%d/%Y")) %>% 
+  transform(Controlled.Date = as.Date(Controlled.Date, format = "%m/%d/%Y")) %>% 
+  transform(Costs = as.numeric(gsub("[\\$,]", "", Costs))) %>%
+  transform(Size = as.numeric(gsub("[\\ACRES,]", "", Size))) %>% 
+  ##cleaning incident number col
+  transform(Incident.Number = gsub(" ", "-", Incident.Number)) %>% #substitute white space for dash
+  transform(Incident.Number = gsub("--", "-", Incident.Number)) %>% #remove any double dash instances
+  transform(Incident.Number = gsub("CA-","", Incident.Number)) %>% #remove CAs from incident num.
+  #transform(Incident.Number = gsub("^([A-Z]{3})([0-9]+)$", "-", Incident.Number)) %>%  #add dash ids (not working)
+  mutate(unit = str_extract(Incident.Number, "[A-Z]+")) %>%  #extract unit from incident num.
+  mutate(inc.num = str_extract(Incident.Number, "[^-]+$")) %>% #extract unit numbers
+  transform(inc.num = formatC(as.numeric(inc.num), width = 8, format = "d", flag = "0")) %>% #pad to 8 digits
+  mutate(INC_CLEAN = paste0(unit, "-", inc.num)) %>% #merge cleaned numbers 
+  #add year column
+  mutate(year = str_extract(Start.Date, "[^-]+"))
 ```
 
 Load Alex data
@@ -201,7 +201,7 @@ Take a look at the plot of these values and fire sizes below.
 
 ``` r
 ggplot(fire_data_joined, aes(x = INC_CLEAN, y = Size)) +
-  geom_bar(stat = "identity", width = 1)
+geom_bar(stat = "identity", width = 1)
 ```
 
 ![](ics_209_figure_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-6-1.png)
@@ -248,21 +248,6 @@ head(full)
 
 It is clear from this table that the incident numbers in Alex's data (rows with inc/OBJECTID filled in) don't match the ICS-209 incident numbers (rows with Structures/costs filled in). Next, we'll need to try some partial matching based on Start.Date, Incident.Name, and Size to see how many more rows we can merge to create a more complete dataset of the cost and structural loss that was associate with the fires greater than 10,000 acres between 2001-2013.
 
-Partial Matching Attempt
-------------------------
-
-**In Progress**
-
-Here, I attempt to match:
-
--   `Incident.Name` by first 3 characters
--   `Start.Date` within 5 days of eachother
--   `Size` within 1000 acres of eachother
-
-``` r
-#TBD
-```
-
 New Merge with Millie Data
 --------------------------
 
@@ -289,3 +274,186 @@ head(shape)
     ## 4       <NA>      <NA>     0    49
     ## 5       <NA>      <NA>     0    49
     ## 6       <NA>      <NA>     0    49
+
+KC: Starting by removing duplicates from shape df so we know how many fire over 10,000 acres we're working wit.
+
+``` r
+#need to remove duplicates from new shape data
+
+head(shape)
+```
+
+    ##   X      MAPMETHOD AGENCY COMPLEXNM INCOMPLEX FIRE_NAME YEAR GIS_ACRES
+    ## 1 1  Mixed Methods    CDF      <NA>         N      CAMP 2018 145134.81
+    ## 2 2  Mixed Methods   USFS      <NA>         N      CARR 2018 229651.40
+    ## 3 3 Infrared Image    CDF      <NA>         N    COUNTY 2018  89776.54
+    ## 4 4 Infrared Image   USFS      <NA>         N  CRANSTON 2018  13229.16
+    ## 5 5  Mixed Methods   USFS      <NA>         N     DELTA 2018  63505.60
+    ## 6 6 Infrared Image   USFS      <NA>         N   DONNELL 2018  36544.62
+    ##   ALARM_DATE CONT_DATE CAUSE YEARn
+    ## 1       <NA>      <NA>     0    49
+    ## 2       <NA>      <NA>     0    49
+    ## 3       <NA>      <NA>     0    49
+    ## 4       <NA>      <NA>     0    49
+    ## 5       <NA>      <NA>     0    49
+    ## 6       <NA>      <NA>     0    49
+
+``` r
+#counting instances of duplicates by FIRE_NAME
+n_occur <- data.frame(table(shape$FIRE_NAME))
+n_occur[n_occur$Freq > 1,]
+```
+
+    ##         Var1 Freq
+    ## 14      BEAR    2
+    ## 34    CANYON    3
+    ## 39     CEDAR    2
+    ## 50    CORRAL    2
+    ## 58     CROWN    2
+    ## 63       DAY    2
+    ## 69     EAGLE    2
+    ## 76    FRENCH    2
+    ## 88  HAYPRESS    2
+    ## 112     LION    2
+    ## 119     MILL    3
+    ## 124 MOUNTAIN    2
+    ## 129      OAK    2
+    ## 155    RANCH    3
+    ## 197   THOMAS    2
+
+``` r
+#Looks like 15 fires in the data set have some form of duplicate
+
+duplicates <- shape[shape$FIRE_NAME %in% n_occur$Var1[n_occur$Freq > 1],]
+
+# One true duplicate, Ranch fire is listed twice. Thinking about making Fire_Name = "Fire_Name + _YEAR" so each fire has a unique name. Testing with just the duplicates first 
+
+duplicates$Fire_ID <- paste(duplicates$FIRE_NAME, as.character(duplicates$YEAR))
+
+
+#applying this to the shape df
+shape$FIRE_ID <- paste(shape$FIRE_NAME, as.character(shape$YEAR))
+head(shape)
+```
+
+    ##   X      MAPMETHOD AGENCY COMPLEXNM INCOMPLEX FIRE_NAME YEAR GIS_ACRES
+    ## 1 1  Mixed Methods    CDF      <NA>         N      CAMP 2018 145134.81
+    ## 2 2  Mixed Methods   USFS      <NA>         N      CARR 2018 229651.40
+    ## 3 3 Infrared Image    CDF      <NA>         N    COUNTY 2018  89776.54
+    ## 4 4 Infrared Image   USFS      <NA>         N  CRANSTON 2018  13229.16
+    ## 5 5  Mixed Methods   USFS      <NA>         N     DELTA 2018  63505.60
+    ## 6 6 Infrared Image   USFS      <NA>         N   DONNELL 2018  36544.62
+    ##   ALARM_DATE CONT_DATE CAUSE YEARn       FIRE_ID
+    ## 1       <NA>      <NA>     0    49     CAMP 2018
+    ## 2       <NA>      <NA>     0    49     CARR 2018
+    ## 3       <NA>      <NA>     0    49   COUNTY 2018
+    ## 4       <NA>      <NA>     0    49 CRANSTON 2018
+    ## 5       <NA>      <NA>     0    49    DELTA 2018
+    ## 6       <NA>      <NA>     0    49  DONNELL 2018
+
+``` r
+#Double checking for repeats
+n_occur2 <- data.frame(table(shape$FIRE_ID))
+n_occur2[n_occur2$Freq > 1,]
+```
+
+    ##            Var1 Freq
+    ## 130   MILL 2008    2
+    ## 170  RANCH 2018    2
+    ## 212 THOMAS 2017    2
+
+``` r
+shape[shape$FIRE_ID %in% n_occur2$Var1[n_occur2$Freq > 1],]
+```
+
+    ##       X      MAPMETHOD AGENCY         COMPLEXNM INCOMPLEX FIRE_NAME YEAR
+    ## 12   12 Infrared Image    CDF Mendocino Complex         Y     RANCH 2018
+    ## 13   13  Mixed Methods    CDF Mendocino Complex         Y     RANCH 2018
+    ## 18   18        Unknown    C&L              <NA>         N    THOMAS 2017
+    ## 127 127           <NA>    USF              <NA>      <NA>      MILL 2008
+    ## 135 135           <NA>    CDF              <NA>      <NA>      MILL 2008
+    ## 232 232           <NA>    USF              <NA>      <NA>    THOMAS 2017
+    ##     GIS_ACRES ALARM_DATE  CONT_DATE CAUSE YEARn     FIRE_ID
+    ## 12  410202.53       <NA>       <NA>     0    49  RANCH 2018
+    ## 13  410202.46       <NA>       <NA>     0    49  RANCH 2018
+    ## 18  281795.83       <NA>       <NA>     0    48 THOMAS 2017
+    ## 127  65882.04 2008-06-20 2008-10-03     1    39   MILL 2008
+    ## 135  13511.76 2008-06-21 2008-06-29     1    39   MILL 2008
+    ## 232 281790.88 2017-12-04 2018-01-12     9    48 THOMAS 2017
+
+``` r
+#how best to remove remaining duplicates?
+#Double checking remaining fires and their GIS_ACRES
+#CalFire says that the Ranch fire burned ~400,000 acres (whaa?! cray). So the two instances we have in the shape data are true duplicates (both GIS_ACRES are about the same)
+#CalFire also has simialr estimates for burned acreage for both of our Thomas_2017 fires. So these two are true duplicates as well. 
+#Not finding any definitive answer on the Mill 2008 fire. The acreage is really different too. I saw on wikipedia that it was listed as being ~13,000 acres, which seems to match one of the entries. But Im not sure where that data soruce came from... There are many Mill/Mill creek fires in different years, so I'm not sure how to work out which one the other is referring to. Maybe throw it/them out? 
+
+#Remove duplicate RANCH 2018 fire
+shape <- shape %>%
+  filter(.,FIRE_ID != "RANCH 2018" | MAPMETHOD != "Mixed Methods")
+#Remove duplicate THOMAS 2017 fire
+shape <- shape %>%
+  filter(., FIRE_ID != "THOMAS 2017" | AGENCY != "C&L")
+```
+
+Partial Matching Attempt
+------------------------
+
+**In Progress**
+
+Here, I attempt to match:
+
+-   `Incident.Name` by first 3 characters
+-   `Start.Date` within 5 days of eachother
+-   `Size` within 1000 acres of eachother
+
+``` r
+# Create ID column for both dataframes
+# ID = First 3 characters of incident name + yyyy-mm of startdate
+
+ics_209 <- ics_209 %>% 
+  filter(Size > 10000, str_length(Incident.Name) > 2, !is.na(Start.Date)) %>% 
+  transform(Incident.Name = toupper(Incident.Name)) %>% 
+  mutate(ID = paste0(stringr::str_extract(Incident.Name, "^[A-Z[:space:]]{3}"),"-",as.character(str_extract(Start.Date, "[^-]*-[^-]*")))) %>% 
+  arrange(ID)
+
+shape <- shape %>% 
+  mutate(ID = paste0(stringr::str_extract(FIRE_ID, "^[A-Z]{3}"),"-",as.character(str_extract(ALARM_DATE, "[^-]*-[^-]*")))) %>% 
+  arrange(ID)
+```
+
+``` r
+# Merge dataframes by new 'ID'
+shape_w_ics <- left_join(shape, ics_209, by = "ID") %>% 
+  filter(YEAR > 2002, YEAR < 2014) %>% #shape data is larger, so check rows matched only on filtered frame
+  select(ID, FIRE_NAME, Incident.Name, ALARM_DATE, Start.Date, GIS_ACRES, Size, Costs, Structures.Destroyed) %>% 
+  arrange(FIRE_NAME)
+
+# Count of rows
+# Matching: 89  Not Matching: 48
+
+shape_w_ics %>% 
+  filter(!is.na(Incident.Name)) %>% 
+  nrow()
+```
+
+    ## [1] 89
+
+``` r
+# Check what fires are missing or incomplete from Shapefile data by merging opposite way
+
+ics_w_shape <- left_join(ics_209, shape, by = "ID") %>% 
+  select(ID, FIRE_NAME, Incident.Name, ALARM_DATE, Start.Date, GIS_ACRES, Size, Costs, Structures.Destroyed) %>% 
+  arrange(Incident.Name)
+
+# Count of rows
+# Matching: 95  Not Matching: 33
+
+ics_w_shape %>% 
+  filter(!is.na(FIRE_NAME)) %>% 
+  nrow()
+```
+
+    ## [1] 95
+
+This is a problem....we get about a hundred through matching, but it's very possible that complex fires are divided up, this would mean that structures and costs would need to be added across dataframes. Not sure what to do here. At the very least we can use the shape\_w\_ics and build a preliminary figure with 89 fires (1/4 of the data we need).
