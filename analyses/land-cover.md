@@ -178,6 +178,18 @@ fh <- fhist %>%
     ## Joining, by = "histogram_1"
 
 ``` r
+usgs_landcover_fire<- fh %>%
+  group_by(Landcover) %>%
+  summarise(area = sum(histogram_2) *0.078 *2.47105) %>%
+  na.omit() %>%
+  ggplot(aes(x=Landcover, y= area )) +
+  geom_bar(stat="identity") + coord_flip()
+usgs_landcover_fire
+```
+
+![](land-cover_files/figure-markdown_github/unnamed-chunk-5-1.png)
+
+``` r
 catagory_fire<- fh %>%
   group_by(Category) %>%
   summarise(area = sum(histogram_2) *0.078 *2.47105) %>%
@@ -187,7 +199,7 @@ catagory_fire<- fh %>%
 catagory_fire
 ```
 
-![](land-cover_files/figure-markdown_github/unnamed-chunk-5-1.png)
+![](land-cover_files/figure-markdown_github/unnamed-chunk-5-2.png)
 
 ``` r
 fire_perc<- fh %>%  
@@ -228,22 +240,22 @@ USGS_years<- ggplot(fire_yrs, aes(x=reorder(YEARn, YEARn), y=area, fill= Categor
 USGS_fires
 ```
 
-![](land-cover_files/figure-markdown_github/unnamed-chunk-5-2.png)
+![](land-cover_files/figure-markdown_github/unnamed-chunk-5-3.png)
 
 ``` r
 calveg_fires
 ```
 
-![](land-cover_files/figure-markdown_github/unnamed-chunk-5-3.png)
+![](land-cover_files/figure-markdown_github/unnamed-chunk-5-4.png)
 
 ``` r
 USGS_years
 ```
 
-![](land-cover_files/figure-markdown_github/unnamed-chunk-5-4.png)
+![](land-cover_files/figure-markdown_github/unnamed-chunk-5-5.png)
 
 ``` r
 calveg_years
 ```
 
-![](land-cover_files/figure-markdown_github/unnamed-chunk-5-5.png)
+![](land-cover_files/figure-markdown_github/unnamed-chunk-5-6.png)
