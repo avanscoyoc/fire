@@ -1,0 +1,26 @@
+
+//load fire shapefiles
+var fires = ee.FeatureCollection("users/MillieChapman/fires_10k");
+//link: https://code.earthengine.google.com/b0a975a7b8883376782e89ea74713440
+
+//load landcover map
+var landcover = ee.Image('users/MillieChapman/Fire');
+
+// Display as default
+Map.addLayer(fires, {}, 'default display');
+Map.addLayer(landcover, {}, "lc");
+
+//reduce regions (frequency histogram)
+var lcfires = landcover.reduceRegions({
+  collection: fires,
+  reducer: ee.Reducer.frequencyHistogram(),
+  scale: 30,
+});
+
+
+//export
+Export.table.toDrive({
+   collection: ee.FeatureCollection(lcfires.select([".*"], null, false)),
+  description: 'landcover_fires_10k',
+  fileFormat: 'CSV'
+});

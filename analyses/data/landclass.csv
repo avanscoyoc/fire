@@ -1,0 +1,13 @@
+﻿histogram_1,Landcover,Category
+0,Agriculture,Urban/Agriculture
+1,Barren/other,Grassland
+2,Conifer Forest,Forest
+3,Conifer Woodland,Forest
+4,Desert shrub,Shrub
+5,Hardwood Forest,Forest
+6,Hardwood Woodland,Forest
+7,Herbaceous,Grassland
+8,Shrub,Shrub
+9,Urban,Urban/Agriculture
+10,Water,Urban/Agriculture
+11,Wetland,Urban/Agriculture
