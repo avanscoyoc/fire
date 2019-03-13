@@ -4,7 +4,7 @@ author: "Millie Chapman"
 date: "3/12/2019"
 output: github_document
 ---
-This goes through the same analysis with both USGS and CALVEG vegetation layers.
+This goes through the same analysis with both USGS and CALVEG vegetation layers. 
 
 #With CALVEG 30 - meter Vegetation Data
 
@@ -96,6 +96,14 @@ fh <- fhist %>%
   cSplit("histogram", sep = ",", direction = "long") %>%
   cSplit("histogram", sep = "=", direction = "wide") %>%
   left_join(landclass) 
+
+usgs_landcover_fire<- fh %>%
+  group_by(Landcover) %>%
+  summarise(area = sum(histogram_2) *0.078 *2.47105) %>%
+  na.omit() %>%
+  ggplot(aes(x=Landcover, y= area )) +
+  geom_bar(stat="identity") + coord_flip()
+usgs_landcover_fire
 
 catagory_fire<- fh %>%
   group_by(Category) %>%
