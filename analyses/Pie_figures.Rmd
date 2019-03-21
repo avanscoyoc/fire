@@ -1,0 +1,84 @@
+---
+title: "Pie_Figures"
+author: "Kendall Calhoun"
+date: "3/20/2019"
+output: html_document
+---
+Using USGS data
+
+```{r}
+library(splitstackshape)
+library(tidyverse)
+```
+
+```{r}
+fhist<-read_csv("data/landcover_fires_USGS.csv")
+landclass <- read_csv("data/USGS_key.csv")
+structures<- read_csv("data/structures_cost_calfire.csv")
+
+structures<-structures %>%
+  group_by(FIRE_NAME, YEAR) %>%
+  summarise(structures_destroyed = mean(STRUCTURES_DEST),
+            cost = mean(COST),
+            DEATHS = mean(DEATHS)) %>%
+  filter(cost>10)
+
+#separate at =
+fh <- fhist %>%
+  cSplit("histogram", sep = ",", direction = "long") %>%
+  cSplit("histogram", sep = "=", direction = "wide") %>%
+  left_join(landclass) 
+
+usgs_landcover_fire<- fh %>%
+  group_by(Landcover) %>%
+  summarise(area = sum(histogram_2) *0.078 *2.47105) %>%
+  na.omit() %>%
+  ggplot(aes(x=Landcover, y= area )) +
+  geom_bar(stat="identity") + coord_flip()
+usgs_landcover_fire
+
+catagory_fire<- fh %>%
+  group_by(Category) %>%
+  summarise(area = sum(histogram_2) *0.078 *2.47105) %>%
+  na.omit() %>%
+  ggplot(aes(x=Category, y= area )) +
+  geom_bar(stat="identity") + coord_flip()
+catagory_fire
+
+fire_perc2<- fh %>%  
+  mutate(YEARn = as.numeric(YEAR)) %>%
+  filter(YEARn>30,
+         GIS_ACRES>75000) %>%
+  group_by(FIRE_NAME, Category, GIS_ACRES, YEARn) %>%
+  left_join(structures) %>%
+  summarise(area = sum(histogram_2)) %>%
+  mutate(area = area * .078 * 2.47) %>%
+  na.omit() 
+
+cols <- c("Forest" = "darkgreen", "Grassland" = "#799479", "Shrub" = "#DBA901", "Urban/Agriculture" = "gray") 
+
+cols <- c("Forest" = "darkgreen", 
+          "Grassland" = "#A0522D", 
+          "Shrub" = "#DEB887", 
+          "Urban/Agriculture" = "gray") 
+
+fire_perc2$Category<-factor(fire_perc2$Category, levels=c('Urban/Agriculture', 
+                                                           'Grassland',
+                                                           'Shrub',
+                                                           'Forest'))
+
+#Pie Part!
+
+
+USGS_fires<- fire_perc2 %>%
+  arrange(desc(Category)) %>%
+  ggplot(aes(x=reorder(FIRE_NAME, GIS_ACRES), y=area, fill= Category)) + 
+  geom_bar(stat="identity") + 
+  scale_colour_manual(values = cols, aesthetics = c("colour", "fill")) +
+  theme_minimal() +coord_flip() +
+  labs(y= "Area Burned in California (Hectares)", x= "Fire Name",  title = "USGS 30 meter vegetation data") +
+  theme(legend.title=element_blank(), legend.position = c(0.8, 0.2)) +
+  geom_hline(yintercept=100000, linetype="dashed", 
+             color = "red", size=1)
+USGS_fires
+```
