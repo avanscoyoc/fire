@@ -9,6 +9,7 @@ Using USGS data
 ```{r}
 library(splitstackshape)
 library(tidyverse)
+library(ggplot2)
 ```
 
 ```{r}
@@ -69,16 +70,23 @@ fire_perc2$Category<-factor(fire_perc2$Category, levels=c('Urban/Agriculture',
 
 #Pie Part!
 
+#Composition of structures destroyed
 
-USGS_fires<- fire_perc2 %>%
-  arrange(desc(Category)) %>%
-  ggplot(aes(x=reorder(FIRE_NAME, GIS_ACRES), y=area, fill= Category)) + 
-  geom_bar(stat="identity") + 
-  scale_colour_manual(values = cols, aesthetics = c("colour", "fill")) +
-  theme_minimal() +coord_flip() +
-  labs(y= "Area Burned in California (Hectares)", x= "Fire Name",  title = "USGS 30 meter vegetation data") +
-  theme(legend.title=element_blank(), legend.position = c(0.8, 0.2)) +
-  geom_hline(yintercept=100000, linetype="dashed", 
-             color = "red", size=1)
-USGS_fires
+destructive_fires <- c(structures$FIRE_NAME)
+
+destructive <- fire_perc2 %>%
+  filter(., FIRE_NAME %in% destructive_fires)
+
+strucutres_bar <- destructive %>%
+  ggplot(aes(x = "", y = area, fill = Category)) + 
+  geom_bar(width = 1, stat = "identity") +
+  scale_colour_manual(values = cols, aesthetics = c("colour", "fill")) + 
+  theme_minimal() +
+  theme(legend.title=element_blank())
+strucutres_bar
+
+strucutres_pie <- strucutres_bar + coord_polar("y", start=0)
+strucutres_pie
+
+
 ```
