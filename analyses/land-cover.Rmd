@@ -147,7 +147,7 @@ calveg_years
 ```
 
 ```{r}
-megafire_perc <- fire_perc %>%
+megafire_perc <- fire_perc2 %>%
   filter(GIS_ACRES >= 100000)
 
 megafires<- ggplot(megafire_perc, aes(x=reorder(FIRE_NAME, GIS_ACRES), y=area, fill= Category)) + 

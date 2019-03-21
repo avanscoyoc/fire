@@ -78,7 +78,7 @@ destructive <- fire_perc2 %>%
   filter(., FIRE_NAME %in% destructive_fires)
 
 strucutres_bar <- destructive %>%
-  ggplot(aes(x = "", y = area, fill = Category)) + 
+  ggplot(aes(x = "Destructive Fires Veg Cover", y = area, fill = Category)) + 
   geom_bar(width = 1, stat = "identity") +
   scale_colour_manual(values = cols, aesthetics = c("colour", "fill")) + 
   theme_minimal() +
@@ -88,5 +88,39 @@ strucutres_bar
 strucutres_pie <- strucutres_bar + coord_polar("y", start=0)
 strucutres_pie
 
+#now one for all the fires
 
+all_fires_bar <- fire_perc2 %>%
+  ggplot(aes(x = "All Fires Burned Veg Cover", y = area, fill = Category)) + 
+  geom_bar(width = 1, stat = "identity") +
+  scale_colour_manual(values = cols, aesthetics = c("colour", "fill")) + 
+  theme_minimal() +
+  theme(legend.title=element_blank())
+all_fires_bar
+
+all_fires_pie <- all_fires_bar + coord_polar("y", start=0)
+
+all_fires_pie
+strucutres_pie
+
+#Megafire pie chart
+
+megafire_perc <- fire_perc2 %>%
+  filter(GIS_ACRES >= 100000)
+
+megafire_bar <- megafire_perc %>%
+  ggplot(aes(x = "Megafires Veg Cover", y = area, fill = Category)) + 
+  geom_bar(width = 1, stat = "identity") +
+  scale_colour_manual(values = cols, aesthetics = c("colour", "fill")) + 
+  theme_minimal() +
+  theme(legend.title=element_blank())
+megafire_bar
+
+megafire_pie <-megafire_bar + coord_polar("y", start=0)
+
+megafire_pie
+all_fires_pie
+strucutres_pie
 ```
+
+Looks like they are all pretty similar!
