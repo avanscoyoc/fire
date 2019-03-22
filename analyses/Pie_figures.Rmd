@@ -148,12 +148,18 @@ str_wedges
 megafire_wedges <- aggregate(megafire_perc$area, by=list(Category=megafire_perc$Category), FUN=sum)
 megafire_wedges
 
-allfires_wedgebar <- fire_perc2 %>%
-  ggplot(aes(x = "All Fires Burned Veg Cover", y = area, fill = Category)) + 
+allfires_wedgebar <- allfire_wedges %>%
+  ggplot(aes(x = "All Fires Burned Veg Cover", y = x, fill = Category)) + 
   geom_bar(width = 1, stat = "identity") +
   scale_colour_manual(values = cols, aesthetics = c("colour", "fill")) + 
   theme_minimal() +
   theme(legend.title=element_blank())
+allfires_wedgebar
+
+allfires_pie_wedge <- allfires_wedgebar +  coord_polar("y", start=0) + blank_theme + 
+  theme(axis.text.x=element_blank())
+allfires_pie_wedge
+
 ```
 
 
