@@ -123,7 +123,10 @@ fire_perc<- fh %>%
   group_by(FIRE_NAME, Category, GIS_ACRES, YEARn) %>%
   summarise(area = sum(histogram_2)) %>%
   mutate(area = area * .078 * 2.47) %>%
-  na.omit() 
+  na.omit() %>% 
+  group_by(FIRE_NAME) %>% 
+  mutate(sumarea = sum(GIS_ACRES)) %>% 
+  arrange(desc(sumarea))
 
 cols <- c("Forest" = "darkgreen", "Grassland" = "#799479", "Shrub" = "#DBA901", "Urban/Agriculture" = "gray") 
 
@@ -307,13 +310,24 @@ megafires
 ``` r
 fire_final <- fire_perc %>% 
   transform(FIRE_NAME = map_chr(FIRE_NAME, str_to_title)) %>% 
-  mutate(c = ifelse(GIS_ACRES > 100000, "red", "black")) 
+  #mutate(c = ifelse(GIS_ACRES > 100000, "red", "black")) %>% 
+  group_by(FIRE_NAME) %>% 
+  mutate(sumarea = sum(GIS_ACRES)) %>% 
+  arrange(desc(sumarea))
 
-a <- fire_final$c
+name_color <- fire_final %>% 
+  select(FIRE_NAME,GIS_ACRES, sumarea) %>% 
+  distinct() 
+name_color <- name_color[-c(2:3),]
+name_color <- name_color %>% 
+  mutate(c = ifelse(GIS_ACRES > 100000, "red", "black")) %>% 
+  arrange(sumarea)
+a <- name_color$c
 
 final_fig<- fire_final %>%
+  arrange(desc(sumarea)) %>% 
   arrange(desc(Category)) %>%
-  ggplot(aes(x=reorder(FIRE_NAME, GIS_ACRES), y=area, fill= Category)) + 
+  ggplot(aes(x=reorder(FIRE_NAME, sumarea), y=area, fill= Category)) + 
   geom_bar(stat="identity") +
   scale_colour_manual(values = cols, aesthetics = c("colour", "fill")) +
   scale_y_continuous(labels = scales::comma) +
