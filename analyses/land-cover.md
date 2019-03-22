@@ -1,50 +1,121 @@
----
-title: "Land cover analysis"
-author: "Millie Chapman"
-date: "3/12/2019"
-output: github_document
----
-This goes through the same analysis with both USGS and CALVEG vegetation layers. 
+Land cover analysis
+================
+Millie Chapman
+3/12/2019
 
-#With CALVEG 30 - meter Vegetation Data
+This goes through the same analysis with both USGS and CALVEG vegetation layers.
 
-```{r}
+With CALVEG 30 - meter Vegetation Data
+======================================
+
+``` r
 library(splitstackshape)
+```
+
+    ## Warning: package 'splitstackshape' was built under R version 3.4.4
+
+``` r
 library(tidyverse)
 ```
 
-```{r}
-fhist<-read_csv("data/landcover_fire_histogram.csv")
-landclass <- read_csv("data/landclass.csv")
+    ## Warning: package 'tidyverse' was built under R version 3.4.2
 
+    ## ── Attaching packages ──────────────────────────────────────────────────────────────────────────────── tidyverse 1.2.1 ──
+
+    ## ✔ ggplot2 3.1.0     ✔ purrr   0.2.5
+    ## ✔ tibble  1.4.2     ✔ dplyr   0.7.8
+    ## ✔ tidyr   0.8.1     ✔ stringr 1.3.1
+    ## ✔ readr   1.1.1     ✔ forcats 0.2.0
+
+    ## Warning: package 'ggplot2' was built under R version 3.4.4
+
+    ## Warning: package 'tibble' was built under R version 3.4.3
+
+    ## Warning: package 'tidyr' was built under R version 3.4.4
+
+    ## Warning: package 'purrr' was built under R version 3.4.4
+
+    ## Warning: package 'dplyr' was built under R version 3.4.4
+
+    ## Warning: package 'stringr' was built under R version 3.4.4
+
+    ## ── Conflicts ─────────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
+    ## ✖ dplyr::filter() masks stats::filter()
+    ## ✖ dplyr::lag()    masks stats::lag()
+
+``` r
+fhist<-read_csv("data/landcover_fire_histogram.csv")
 ```
 
-```{r}
+    ## Parsed with column specification:
+    ## cols(
+    ##   `system:index` = col_character(),
+    ##   AGENCY = col_character(),
+    ##   ALARM_DATE = col_double(),
+    ##   CAUSE = col_integer(),
+    ##   COMPLEXNM = col_character(),
+    ##   CONT_DATE = col_double(),
+    ##   FIRE_NAME = col_character(),
+    ##   GIS_ACRES = col_double(),
+    ##   INCOMPLEX = col_character(),
+    ##   MAPMETHOD = col_character(),
+    ##   YEAR = col_integer(),
+    ##   YEARn = col_integer(),
+    ##   histogram = col_character(),
+    ##   .geo = col_character()
+    ## )
+
+``` r
+landclass <- read_csv("data/landclass.csv")
+```
+
+    ## Parsed with column specification:
+    ## cols(
+    ##   histogram_1 = col_integer(),
+    ##   Landcover = col_character(),
+    ##   Category = col_character()
+    ## )
+
+``` r
 library(splitstackshape)
 #separate at =
 fh <- fhist %>%
   cSplit("histogram", sep = ",", direction = "long") %>%
   cSplit("histogram", sep = "=", direction = "wide") %>%
   left_join(landclass) 
+```
 
+    ## Joining, by = "histogram_1"
+
+``` r
 land_fire<- fh %>%
   group_by(Landcover) %>%
   summarise(area = sum(histogram_2)) %>% na.omit() %>%
   ggplot(aes(x=Landcover, y= area )) +
   geom_bar(stat="identity") + coord_flip()
 land_fire
+```
 
+![](land-cover_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-3-1.png)
+
+``` r
 catagory_fire<- fh %>%
   group_by(Category) %>%
   summarise(area = sum(histogram_2) *0.078 *2.47105) %>%
   na.omit() %>%
   ggplot(aes(x=Category, y= area )) +
   geom_bar(stat="identity") + coord_flip()
-catagory_fire
-  
 ```
 
-```{r}
+    ## Warning: package 'bindrcpp' was built under R version 3.4.4
+
+``` r
+catagory_fire
+```
+
+![](land-cover_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-3-2.png)
+
+``` r
 fire_perc<- fh %>%  
   mutate(YEARn = as.numeric(YEAR)) %>%
   filter(YEARn>30,
@@ -64,19 +135,66 @@ calveg_fires<- ggplot(fire_perc, aes(x=reorder(FIRE_NAME, GIS_ACRES), y=area, fi
   theme(legend.title=element_blank(), legend.position = c(0.8, 0.2)) +
   geom_hline(yintercept=100000, linetype="dashed", 
                 color = "red", size=1)
-
-
-
 ```
 
-## With USGS 30 meter Vegetation Data
+With USGS 30 meter Vegetation Data
+----------------------------------
 
 Pull in frequency histogram from google earth engine
 
-```{r}
+``` r
 fhist<-read_csv("data/landcover_fires_USGS.csv")
+```
+
+    ## Parsed with column specification:
+    ## cols(
+    ##   `system:index` = col_character(),
+    ##   AGENCY = col_character(),
+    ##   ALARM_DATE = col_double(),
+    ##   CAUSE = col_integer(),
+    ##   COMPLEXNM = col_character(),
+    ##   CONT_DATE = col_double(),
+    ##   FIRE_NAME = col_character(),
+    ##   GIS_ACRES = col_double(),
+    ##   INCOMPLEX = col_character(),
+    ##   MAPMETHOD = col_character(),
+    ##   YEAR = col_integer(),
+    ##   YEARn = col_integer(),
+    ##   histogram = col_character(),
+    ##   .geo = col_character()
+    ## )
+
+``` r
 landclass <- read_csv("data/USGS_key.csv")
+```
+
+    ## Parsed with column specification:
+    ## cols(
+    ##   histogram_1 = col_integer(),
+    ##   Landcover = col_character(),
+    ##   Category = col_character(),
+    ##   Description = col_character()
+    ## )
+
+``` r
 structures<- read_csv("data/structures_cost_calfire.csv")
+```
+
+    ## Warning: Missing column names filled in: 'X8' [8]
+
+    ## Parsed with column specification:
+    ## cols(
+    ##   FIRE_NAME = col_character(),
+    ##   YEAR = col_integer(),
+    ##   STRUCTURES_DEST = col_integer(),
+    ##   COST = col_integer(),
+    ##   DEATHS = col_integer(),
+    ##   TOP_20_DEST = col_character(),
+    ##   TOP_20_LG = col_character(),
+    ##   X8 = col_character()
+    ## )
+
+``` r
 structures<-structures %>%
   group_by(FIRE_NAME, YEAR) %>%
   summarise(structures_destroyed = mean(STRUCTURES_DEST),
@@ -88,7 +206,11 @@ fh <- fhist %>%
   cSplit("histogram", sep = ",", direction = "long") %>%
   cSplit("histogram", sep = "=", direction = "wide") %>%
   left_join(landclass) 
+```
 
+    ## Joining, by = "histogram_1"
+
+``` r
 usgs_landcover_fire<- fh %>%
   group_by(Landcover) %>%
   summarise(area = sum(histogram_2) *0.078 *2.47105) %>%
@@ -96,7 +218,11 @@ usgs_landcover_fire<- fh %>%
   ggplot(aes(x=Landcover, y= area )) +
   geom_bar(stat="identity") + coord_flip()
 usgs_landcover_fire
+```
 
+![](land-cover_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-5-1.png)
+
+``` r
 catagory_fire<- fh %>%
   group_by(Category) %>%
   summarise(area = sum(histogram_2) *0.078 *2.47105) %>%
@@ -104,7 +230,11 @@ catagory_fire<- fh %>%
   ggplot(aes(x=Category, y= area )) +
   geom_bar(stat="identity") + coord_flip()
 catagory_fire
-  
+```
+
+![](land-cover_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-5-2.png)
+
+``` r
 fire_perc2<- fh %>%  
   mutate(YEARn = as.numeric(YEAR)) %>%
   filter(YEARn>30,
@@ -114,7 +244,11 @@ fire_perc2<- fh %>%
   summarise(area = sum(histogram_2)) %>%
   mutate(area = area * .078 * 2.47) %>%
   na.omit() 
+```
 
+    ## Joining, by = c("FIRE_NAME", "YEAR")
+
+``` r
 cols <- c("Forest" = "darkgreen", "Grassland" = "#799479", "Shrub" = "#DBA901", "Urban/Agriculture" = "gray") 
 
 cols <- c("Forest" = "darkgreen", 
@@ -137,14 +271,23 @@ USGS_fires<- fire_perc %>%
   geom_hline(yintercept=100000, linetype="dashed", 
              color = "red", size=1)
 USGS_fires
-
-USGS_fires
-calveg_fires
-
-
 ```
 
-```{r}
+![](land-cover_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-5-3.png)
+
+``` r
+USGS_fires
+```
+
+![](land-cover_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-5-4.png)
+
+``` r
+calveg_fires
+```
+
+![](land-cover_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-5-5.png)
+
+``` r
 megafire_perc <- fire_perc2 %>%
   filter(GIS_ACRES >= 100000)
 
@@ -159,7 +302,9 @@ megafires<- ggplot(megafire_perc, aes(x=reorder(FIRE_NAME, GIS_ACRES), y=area, f
 megafires
 ```
 
-```{r}
+![](land-cover_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-6-1.png)
+
+``` r
 fire_final <- fire_perc %>% 
   transform(FIRE_NAME = map_chr(FIRE_NAME, str_to_title)) %>% 
   mutate(c = ifelse(GIS_ACRES > 100000, "red", "black")) 
@@ -186,3 +331,4 @@ final_fig<- fire_final %>%
 final_fig
 ```
 
+![](land-cover_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-7-1.png)
