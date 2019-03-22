@@ -10,6 +10,7 @@ Using USGS data
 library(splitstackshape)
 library(tidyverse)
 library(ggplot2)
+library(scales)
 ```
 
 ```{r}
@@ -70,6 +71,17 @@ fire_perc2$Category<-factor(fire_perc2$Category, levels=c('Urban/Agriculture',
 
 #Pie Part!
 
+#Blank themee
+
+blank_theme <- theme_minimal()+
+  theme(
+  axis.title.x = element_blank(),
+  axis.title.y = element_blank(),
+  panel.border = element_blank(),
+  panel.grid=element_blank(),
+  axis.ticks = element_blank(),
+  plot.title=element_text(size=14, face="bold"))
+
 #Composition of structures destroyed
 
 destructive_fires <- c(structures$FIRE_NAME)
@@ -96,9 +108,11 @@ all_fires_bar <- fire_perc2 %>%
   scale_colour_manual(values = cols, aesthetics = c("colour", "fill")) + 
   theme_minimal() +
   theme(legend.title=element_blank())
+          
 all_fires_bar
 
-all_fires_pie <- all_fires_bar + coord_polar("y", start=0)
+all_fires_pie <- all_fires_bar + coord_polar("y", start=0) + blank_theme + 
+  theme(axis.text.x=element_blank())
 
 all_fires_pie
 strucutres_pie
@@ -116,11 +130,38 @@ megafire_bar <- megafire_perc %>%
   theme(legend.title=element_blank())
 megafire_bar
 
-megafire_pie <-megafire_bar + coord_polar("y", start=0)
+megafire_pie <-megafire_bar + coord_polar("y", start=0) + theme(axis.text.x=element_blank()) + blank_theme
 
 megafire_pie
 all_fires_pie
 strucutres_pie
 ```
+Prettier Pies
+
+```{r}
+allfire_wedges <- aggregate(fire_perc2$area, by=list(Category=fire_perc2$Category), FUN=sum)
+allfire_wedges
+colnames(allfire_wedges, )
+
+str_wedges <- aggregate(destructive$area, by=list(Category=destructive$Category), FUN=sum)
+str_wedges
+
+megafire_wedges <- aggregate(megafire_perc$area, by=list(Category=megafire_perc$Category), FUN=sum)
+megafire_wedges
+
+allfires_wedgebar <- allfire_wedges %>%
+  ggplot(aes(x = "All Fires Burned Veg Cover", y = x, fill = Category)) + 
+  geom_bar(width = 1, stat = "identity") +
+  scale_colour_manual(values = cols, aesthetics = c("colour", "fill")) + 
+  theme_minimal() +
+  theme(legend.title=element_blank())
+allfires_wedgebar
+
+allfires_pie_wedge <- allfires_wedgebar +  coord_polar("y", start=0) + blank_theme + 
+  theme(axis.text.x=element_blank())
+allfires_pie_wedge
+
+```
+
 
 Looks like they are all pretty similar!
