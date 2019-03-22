@@ -69,9 +69,6 @@ fire_perc2$Category<-factor(fire_perc2$Category, levels=c('Urban/Agriculture',
                                                            'Shrub',
                                                            'Forest'))
 
-test <- aggregate(fire_perc2$area, by=list(Category=fire_perc2$Category), FUN=sum)
-test
-
 #Pie Part!
 
 #Blank themee
@@ -139,5 +136,18 @@ megafire_pie
 all_fires_pie
 strucutres_pie
 ```
+Prettier Pies
+
+```{r}
+allfire_wedges <- aggregate(fire_perc2$area, by=list(Category=fire_perc2$Category), FUN=sum)
+allfire_wedges
+
+str_wedges <- aggregate(destructive$area, by=list(Category=destructive$Category), FUN=sum)
+str_wedges
+
+megafire_wedges <- aggregate(megafire_perc$area, by=list(Category=megafire_perc$Category), FUN=sum)
+megafire_wedges
+```
+
 
 Looks like they are all pretty similar!
