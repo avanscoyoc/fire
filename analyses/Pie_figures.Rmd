@@ -141,26 +141,46 @@ Prettier Pies
 ```{r}
 allfire_wedges <- aggregate(fire_perc2$area, by=list(Category=fire_perc2$Category), FUN=sum)
 allfire_wedges
-colnames(allfire_wedges, )
+colnames(allfire_wedges) <- c("Category", "area")
 
-str_wedges <- aggregate(destructive$area, by=list(Category=destructive$Category), FUN=sum)
-str_wedges
+structure_wedges <- aggregate(destructive$area, by=list(Category=destructive$Category), FUN=sum)
+structure_wedges
+colnames(structure_wedges) <- c("Category", "area")
 
 megafire_wedges <- aggregate(megafire_perc$area, by=list(Category=megafire_perc$Category), FUN=sum)
 megafire_wedges
 
 allfires_wedgebar <- allfire_wedges %>%
-  ggplot(aes(x = "All Fires Burned Veg Cover", y = x, fill = Category)) + 
+  ggplot(aes(x = "", y = area, fill = Category)) + 
   geom_bar(width = 1, stat = "identity") +
   scale_colour_manual(values = cols, aesthetics = c("colour", "fill")) + 
   theme_minimal() +
   theme(legend.title=element_blank())
 allfires_wedgebar
 
-allfires_pie_wedge <- allfires_wedgebar +  coord_polar("y", start=0) + blank_theme + 
-  theme(axis.text.x=element_blank())
+allfires_pie_wedge <- allfires_wedgebar + coord_polar("y", start=0) + blank_theme + 
+  theme(axis.text.x=element_blank()) +
+  ggtitle("Veg Cover of All Fires (>10,000 acres)") +
+  theme(plot.title = element_text(size = 15, family = "Helvetica", face = "bold")) +
+  theme(legend.text=element_text(size=8, family = "Helvetica"))
 allfires_pie_wedge
 
+str_bar <- structure_wedges %>%
+  ggplot(aes(x = "", y = area, fill = Category)) + 
+  geom_bar(width = 1, stat = "identity") +
+  scale_colour_manual(values = cols, aesthetics = c("colour", "fill")) + 
+  theme_minimal() +
+  theme(legend.title=element_blank())
+  
+str_bar
+
+str_pie <- str_bar +  coord_polar("y", start=0) + blank_theme + 
+  theme(axis.text.x=element_blank()) +
+  ggtitle("Veg Cover of Most Destructive Fires (structures)") +
+  theme(plot.title = element_text(size = 15, family = "Helvetica", face = "bold")) +
+  theme(legend.text=element_text(size=8, family = "Helvetica"))
+str_pie
+allfires_pie_wedge
 ```
 
 
