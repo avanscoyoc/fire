@@ -108,7 +108,15 @@ catagory_fire<- fh %>%
   geom_bar(stat="identity") + coord_flip()
 catagory_fire
   
-fire_perc2<- fh %>%  
+#Remove duplicate THOMAS 2017 fire
+fh <- fh %>%
+  filter(., FIRE_NAME != "THOMAS" | AGENCY != "C&L")
+
+#Remove duplicate RANCH 2018 fire
+fh <- fh %>%
+  filter(.,FIRE_NAME != "RANCH" | MAPMETHOD != "Mixed Methods")
+
+fire_perc<- fh %>%  
   mutate(YEARn = as.numeric(YEAR)) %>%
   filter(YEARn>30,
          GIS_ACRES>75000) %>%
@@ -140,6 +148,7 @@ USGS_fires<- fire_perc %>%
   geom_hline(yintercept=100000, linetype="dashed", 
              color = "red", size=1)
 USGS_fires
+#Is the Biscuit Fire here only showing land burned in CA?
 
 USGS_fires
 calveg_fires
