@@ -115,6 +115,9 @@ fh <- fh %>%
 #Remove duplicate RANCH 2018 fire
 fh <- fh %>%
   filter(.,FIRE_NAME != "RANCH" | MAPMETHOD != "Mixed Methods")
+#Remove Biscuit Fire (Most of fire occurs in Oregon)
+fh <- fh %>%
+  filter(., FIRE_NAME != "BISCUIT")
 
 fire_perc<- fh %>%  
   mutate(YEARn = as.numeric(YEAR)) %>%
@@ -157,7 +160,7 @@ calveg_fires
 ```
 
 ```{r}
-megafire_perc <- fire_perc2 %>%
+megafire_perc <- fire_perc %>%
   filter(GIS_ACRES >= 100000)
 
 megafires<- ggplot(megafire_perc, aes(x=reorder(FIRE_NAME, GIS_ACRES), y=area, fill= Category)) + 
