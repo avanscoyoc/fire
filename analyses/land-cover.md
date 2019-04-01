@@ -20,14 +20,12 @@ library(tidyverse)
 
     ## Warning: package 'tidyverse' was built under R version 3.4.2
 
-    ## ── Attaching packages ──────────────────────────────────────────────────────────────────────────────── tidyverse 1.2.1 ──
+    ## ── Attaching packages ─────────────────────────────────────── tidyverse 1.2.1 ──
 
-    ## ✔ ggplot2 3.1.0     ✔ purrr   0.2.5
-    ## ✔ tibble  1.4.2     ✔ dplyr   0.7.8
-    ## ✔ tidyr   0.8.1     ✔ stringr 1.3.1
-    ## ✔ readr   1.1.1     ✔ forcats 0.2.0
-
-    ## Warning: package 'ggplot2' was built under R version 3.4.4
+    ## ✔ ggplot2 3.1.0.9000     ✔ purrr   0.2.5     
+    ## ✔ tibble  1.4.2          ✔ dplyr   0.7.8     
+    ## ✔ tidyr   0.8.1          ✔ stringr 1.3.1     
+    ## ✔ readr   1.1.1          ✔ forcats 0.2.0
 
     ## Warning: package 'tibble' was built under R version 3.4.3
 
@@ -39,7 +37,7 @@ library(tidyverse)
 
     ## Warning: package 'stringr' was built under R version 3.4.4
 
-    ## ── Conflicts ─────────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
+    ## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
     ## ✖ dplyr::filter() masks stats::filter()
     ## ✖ dplyr::lag()    masks stats::lag()
 
@@ -96,7 +94,7 @@ land_fire<- fh %>%
 land_fire
 ```
 
-![](land-cover_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-3-1.png)
+![](land-cover_files/figure-markdown_github/unnamed-chunk-3-1.png)
 
 ``` r
 catagory_fire<- fh %>%
@@ -113,7 +111,7 @@ catagory_fire<- fh %>%
 catagory_fire
 ```
 
-![](land-cover_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-3-2.png)
+![](land-cover_files/figure-markdown_github/unnamed-chunk-3-2.png)
 
 ``` r
 fire_perc<- fh %>%  
@@ -223,7 +221,7 @@ usgs_landcover_fire<- fh %>%
 usgs_landcover_fire
 ```
 
-![](land-cover_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-5-1.png)
+![](land-cover_files/figure-markdown_github/unnamed-chunk-5-1.png)
 
 ``` r
 catagory_fire<- fh %>%
@@ -235,10 +233,21 @@ catagory_fire<- fh %>%
 catagory_fire
 ```
 
-![](land-cover_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-5-2.png)
+![](land-cover_files/figure-markdown_github/unnamed-chunk-5-2.png)
 
 ``` r
-fire_perc2<- fh %>%  
+#Remove duplicate THOMAS 2017 fire
+fh <- fh %>%
+  filter(., FIRE_NAME != "THOMAS" | AGENCY != "C&L")
+
+#Remove duplicate RANCH 2018 fire
+fh <- fh %>%
+  filter(.,FIRE_NAME != "RANCH" | MAPMETHOD != "Mixed Methods")
+#Remove Biscuit Fire (Most of fire occurs in Oregon)
+fh <- fh %>%
+  filter(., FIRE_NAME != "BISCUIT")
+
+fire_perc<- fh %>%  
   mutate(YEARn = as.numeric(YEAR)) %>%
   filter(YEARn>30,
          GIS_ACRES>75000) %>%
@@ -276,22 +285,24 @@ USGS_fires<- fire_perc %>%
 USGS_fires
 ```
 
-![](land-cover_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-5-3.png)
+![](land-cover_files/figure-markdown_github/unnamed-chunk-5-3.png)
 
 ``` r
+#Is the Biscuit Fire here only showing land burned in CA?
+
 USGS_fires
 ```
 
-![](land-cover_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-5-4.png)
+![](land-cover_files/figure-markdown_github/unnamed-chunk-5-4.png)
 
 ``` r
 calveg_fires
 ```
 
-![](land-cover_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-5-5.png)
+![](land-cover_files/figure-markdown_github/unnamed-chunk-5-5.png)
 
 ``` r
-megafire_perc <- fire_perc2 %>%
+megafire_perc <- fire_perc %>%
   filter(GIS_ACRES >= 100000)
 
 megafires<- ggplot(megafire_perc, aes(x=reorder(FIRE_NAME, GIS_ACRES), y=area, fill= Category)) + 
@@ -305,7 +316,7 @@ megafires<- ggplot(megafire_perc, aes(x=reorder(FIRE_NAME, GIS_ACRES), y=area, f
 megafires
 ```
 
-![](land-cover_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-6-1.png)
+![](land-cover_files/figure-markdown_github/unnamed-chunk-6-1.png)
 
 ``` r
 fire_final <- fire_perc %>% 
@@ -318,7 +329,6 @@ fire_final <- fire_perc %>%
 name_color <- fire_final %>% 
   select(FIRE_NAME,GIS_ACRES, sumarea) %>% 
   distinct() 
-name_color <- name_color[-c(2:3),]
 name_color <- name_color %>% 
   mutate(c = ifelse(GIS_ACRES > 100000, "red", "black")) %>% 
   arrange(sumarea)
@@ -338,11 +348,11 @@ final_fig<- fire_final %>%
         axis.text.y = element_text(size=9, family = "Helvetica", colour = a), 
         legend.position = "bottom") +
   coord_flip() +
-  labs(y = "Hectares Burned in California", 
+  labs(y = "Acres Burned in California", 
        x = element_blank(),
        fill = element_blank())
 
-final_fig
+final_fig 
 ```
 
-![](land-cover_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-7-1.png)
+![](land-cover_files/figure-markdown_github/unnamed-chunk-7-1.png)

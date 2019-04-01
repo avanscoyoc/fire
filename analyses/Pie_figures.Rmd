@@ -154,7 +154,7 @@ strucutres_pie
 
 #Megafire pie chart
 
-megafire_perc <- fire_perc2 %>%
+megafire_perc <- fire_perc %>%
   filter(GIS_ACRES >= 100000)
 
 megafire_bar <- megafire_perc %>%
@@ -175,7 +175,7 @@ strucutres_pie
 Prettier Pies
 
 ```{r}
-allfire_wedges <- aggregate(fire_perc2$area, by=list(Category=fire_perc2$Category), FUN=sum)
+allfire_wedges <- aggregate(fire_perc_all$area, by=list(Category=fire_perc_all$Category), FUN=sum)
 allfire_wedges
 colnames(allfire_wedges) <- c("Category", "area")
 
