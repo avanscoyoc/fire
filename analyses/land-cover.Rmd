@@ -204,7 +204,7 @@ final_fig<- fire_final %>%
         axis.text.y = element_text(size=9, family = "Helvetica", colour = a), 
         legend.position = "bottom") +
   coord_flip() +
-  labs(y = "Hectares Burned in California", 
+  labs(y = "Acres Burned in California", 
        x = element_blank(),
        fill = element_blank())
 
