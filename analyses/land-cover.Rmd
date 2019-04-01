@@ -185,7 +185,6 @@ fire_final <- fire_perc %>%
 name_color <- fire_final %>% 
   select(FIRE_NAME,GIS_ACRES, sumarea) %>% 
   distinct() 
-name_color <- name_color[-c(2:3),]
 name_color <- name_color %>% 
   mutate(c = ifelse(GIS_ACRES > 100000, "red", "black")) %>% 
   arrange(sumarea)
@@ -209,6 +208,6 @@ final_fig<- fire_final %>%
        x = element_blank(),
        fill = element_blank())
 
-final_fig
+final_fig 
 ```
 

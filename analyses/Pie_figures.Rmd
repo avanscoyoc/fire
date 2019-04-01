@@ -20,16 +20,29 @@ structures<- read_csv("data/structures_cost_calfire.csv")
 
 structures<-structures %>%
   group_by(FIRE_NAME, YEAR) %>%
-  summarise(structures_destroyed = mean(STRUCTURES_DEST),
-            cost = mean(COST),
-            DEATHS = mean(DEATHS)) %>%
-  filter(cost>10)
+ summarise(structures_destroyed = mean(STRUCTURES_DEST),
+           cost = mean(COST),
+           DEATHS = mean(DEATHS)) %>%
+ filter(cost>10)
 
 #separate at =
 fh <- fhist %>%
   cSplit("histogram", sep = ",", direction = "long") %>%
   cSplit("histogram", sep = "=", direction = "wide") %>%
   left_join(landclass) 
+
+#Remove dupplicates (Thomas Fire, Ranch Fire, Biscuit Fire)
+
+#Remove duplicate THOMAS 2017 fire
+fh <- fh %>%
+  filter(., FIRE_NAME != "THOMAS" | AGENCY != "C&L")
+
+#Remove duplicate RANCH 2018 fire
+fh <- fh %>%
+  filter(.,FIRE_NAME != "RANCH" | MAPMETHOD != "Mixed Methods")
+#Remove Biscuit Fire (Most of fire occurs in Oregon)
+fh <- fh %>%
+  filter(., FIRE_NAME != "BISCUIT")
 
 usgs_landcover_fire<- fh %>%
   group_by(Landcover) %>%
@@ -47,10 +60,18 @@ catagory_fire<- fh %>%
   geom_bar(stat="identity") + coord_flip()
 catagory_fire
 
-fire_perc2<- fh %>%  
+fire_perc<- fh %>%  
   mutate(YEARn = as.numeric(YEAR)) %>%
   filter(YEARn>30,
          GIS_ACRES>75000) %>%
+  group_by(FIRE_NAME, Category, GIS_ACRES, YEARn) %>%
+  left_join(structures) %>%
+  summarise(area = sum(histogram_2)) %>%
+  mutate(area = area * .078 * 2.47) %>%
+  na.omit() 
+
+fire_perc_all <- fh %>%  
+  mutate(YEARn = as.numeric(YEAR)) %>%
   group_by(FIRE_NAME, Category, GIS_ACRES, YEARn) %>%
   left_join(structures) %>%
   summarise(area = sum(histogram_2)) %>%
@@ -64,13 +85,19 @@ cols <- c("Forest" = "darkgreen",
           "Shrub" = "#DEB887", 
           "Urban/Agriculture" = "gray") 
 
-fire_perc2$Category<-factor(fire_perc2$Category, levels=c('Urban/Agriculture', 
+fire_perc$Category<-factor(fire_perc$Category, levels=c('Urban/Agriculture', 
                                                            'Grassland',
                                                            'Shrub',
                                                            'Forest'))
 
+fire_perc_all$Category <- factor(fire_perc_all$Category, levels=c('Urban/Agriculture', 
+                                                           'Grassland',
+                                                           'Shrub',
+                                                           'Forest'))
+```
 #Pie Part!
 
+```{r}
 #Blank themee
 
 blank_theme <- theme_minimal()+
@@ -83,11 +110,15 @@ blank_theme <- theme_minimal()+
   plot.title=element_text(size=14, face="bold"))
 
 #Composition of structures destroyed
+top_structures_dest <- read_csv("data/top_struct_dest_2000_2018.csv")
 
-destructive_fires <- c(structures$FIRE_NAME)
+destructive_fires <- c(top_structures_dest$name)
 
-destructive <- fire_perc2 %>%
+destructive <- fire_perc_all %>%
   filter(., FIRE_NAME %in% destructive_fires)
+
+destructive <- destructive %>%
+  filter(FIRE_NAME != "CEDAR" | YEARn != 2016)
 
 strucutres_bar <- destructive %>%
   ggplot(aes(x = "Destructive Fires Veg Cover", y = area, fill = Category)) + 
@@ -102,7 +133,7 @@ strucutres_pie
 
 #now one for all the fires
 
-all_fires_bar <- fire_perc2 %>%
+all_fires_bar <- fire_perc_all %>%
   ggplot(aes(x = "All Fires Burned Veg Cover", y = area, fill = Category)) + 
   geom_bar(width = 1, stat = "identity") +
   scale_colour_manual(values = cols, aesthetics = c("colour", "fill")) + 
@@ -136,6 +167,7 @@ megafire_pie
 all_fires_pie
 strucutres_pie
 ```
+
 Prettier Pies
 
 ```{r}
@@ -182,6 +214,6 @@ str_pie <- str_bar +  coord_polar("y", start=0) + blank_theme +
 str_pie
 allfires_pie_wedge
 ```
+Most destructive fires are taken from Calfire "Top 20 Most Destructive Fires of CA" only looking at fires 2000-2018. 15 of the 20 fires are within this time period.
 
-
-Looks like they are all pretty similar!
+All fires now reflects ALL the fires, not just fire >75,000 acres
