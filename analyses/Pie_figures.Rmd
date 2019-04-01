@@ -100,6 +100,10 @@ fire_perc_all$Category <- factor(fire_perc_all$Category, levels=c('Urban/Agricul
 ```{r}
 #Blank themee
 
+cols <- c("Forest" = "darkgreen", 
+          "Grassland" = "#e4d547",
+          "Shrub" = "#fea201", 
+          "Urban/Agriculture" = "gray") 
 blank_theme <- theme_minimal()+
   theme(
   axis.title.x = element_blank(),
