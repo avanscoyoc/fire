@@ -219,5 +219,3 @@ str_pie
 allfires_pie_wedge
 ```
 Most destructive fires are taken from Calfire "Top 20 Most Destructive Fires of CA" only looking at fires 2000-2018. 15 of the 20 fires are within this time period.
-
-All fires now reflects ALL the fires, not just fire >75,000 acres
