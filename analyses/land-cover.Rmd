@@ -182,26 +182,27 @@ fire_final <- fire_perc %>%
   mutate(sumarea = sum(GIS_ACRES)) %>% 
   arrange(desc(sumarea))
 
-name_color <- fire_final %>% 
-  select(FIRE_NAME,GIS_ACRES, sumarea) %>% 
-  distinct() 
-name_color <- name_color %>% 
-  mutate(c = ifelse(GIS_ACRES > 100000, "red", "black")) %>% 
-  arrange(sumarea)
-a <- name_color$c
+# name_color <- fire_final %>% 
+#   select(FIRE_NAME,GIS_ACRES, sumarea) %>% 
+#   distinct() 
+# name_color <- name_color %>% 
+#   mutate(c = ifelse(GIS_ACRES > 100000, "red", "black")) %>% 
+#   arrange(sumarea)
+# a <- name_color$c
 
 final_fig<- fire_final %>%
   arrange(desc(sumarea)) %>% 
   arrange(desc(Category)) %>%
   ggplot(aes(x=reorder(FIRE_NAME, sumarea), y=area, fill= Category)) + 
   geom_bar(stat="identity") +
+  guides(fill = guide_legend(reverse = TRUE)) +
   scale_colour_manual(values = cols, aesthetics = c("colour", "fill")) +
-  scale_y_continuous(labels = scales::comma) +
+  scale_y_continuous(labels = scales::comma, expand = c(0, 0)) +
   theme_classic() +
   theme(axis.title=element_text(size=9,face="bold", family = "Helvetica"),
         legend.text = element_text(colour="black", size=8, family = "Helvetica"),
         axis.text.x = element_text(size=9, family = "Helvetica"),
-        axis.text.y = element_text(size=9, family = "Helvetica", colour = a), 
+        axis.text.y = element_text(size=9, family = "Helvetica"), 
         legend.position = "bottom") +
   coord_flip() +
   labs(y = "Acres Burned in California", 
@@ -209,5 +210,10 @@ final_fig<- fire_final %>%
        fill = element_blank())
 
 final_fig 
+
+
+# mega_text<- textGrob("Megafire\nthreshold", gp=gpar(fontsize=8, fontface="bold"))
+# annotation_custom(mega_text,xmin=100000,xmax=100000,ymin=-0.07,ymax=-0.07) +
+# coord_cartesian(clip = "off")
 ```
 
