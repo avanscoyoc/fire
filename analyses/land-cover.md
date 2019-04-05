@@ -265,7 +265,7 @@ fire_perc<- fh %>%
 ``` r
 cols <- c("Forest" = "darkgreen", "Grassland" = "#799479", "Shrub" = "#DBA901", "Urban/Agriculture" = "gray") 
 
-cols <- c("Forest" = "darkgreen", 
+cols <- c("Forest" = "#608341",  #"darkgreen" 
           "Grassland" = "#e4d547",#A0522D 
           "Shrub" = "#fea201", #DEB887
           "Urban/Agriculture" = "gray") 
@@ -328,6 +328,8 @@ fire_final <- fire_perc %>%
   mutate(sumarea = sum(GIS_ACRES)) %>% 
   arrange(desc(sumarea))
 
+fire_final$FIRE_NAME[29:32]="Basin"
+
 # name_color <- fire_final %>% 
 #   select(FIRE_NAME,GIS_ACRES, sumarea) %>% 
 #   distinct() 
@@ -339,29 +341,24 @@ fire_final <- fire_perc %>%
 final_fig<- fire_final %>%
   arrange(desc(sumarea)) %>% 
   arrange(desc(Category)) %>%
-  ggplot(aes(x=reorder(FIRE_NAME, sumarea), y=area, fill= Category)) + 
+  ggplot(aes(x=reorder(FIRE_NAME, sumarea), y=area, fill= Category, width= 0.8)) + 
   geom_bar(stat="identity") +
   guides(fill = guide_legend(reverse = TRUE)) +
   scale_colour_manual(values = cols, aesthetics = c("colour", "fill")) +
   scale_y_continuous(labels = scales::comma, expand = c(0, 0)) +
   theme_classic() +
-  theme(axis.title=element_text(size=9,face="bold", family = "Helvetica"),
+  theme(plot.margin = unit(c(1,3,1,1), "lines"), 
+        axis.title=element_text(size=9,face="bold", family = "Helvetica"),
         legend.text = element_text(colour="black", size=8, family = "Helvetica"),
-        axis.text.x = element_text(size=9, family = "Helvetica"),
-        axis.text.y = element_text(size=9, family = "Helvetica"), 
+        axis.text.x = element_text(size=8, family = "Helvetica"),
+        axis.text.y = element_text(size=8, family = "Helvetica"), 
         legend.position = "bottom") +
-  coord_flip() +
-  labs(y = "Acres Burned in California", 
+    labs(y = "Acres Burned in California", 
        x = element_blank(),
-       fill = element_blank())
+       fill = element_blank()) +
+  coord_flip() 
 
-final_fig 
+final_fig
 ```
 
 ![](land-cover_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-7-1.png)
-
-``` r
-# mega_text<- textGrob("Megafire\nthreshold", gp=gpar(fontsize=8, fontface="bold"))
-# annotation_custom(mega_text,xmin=100000,xmax=100000,ymin=-0.07,ymax=-0.07) +
-# coord_cartesian(clip = "off")
-```
