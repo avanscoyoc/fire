@@ -186,6 +186,11 @@ colnames(structure_wedges) <- c("Category", "area")
 megafire_wedges <- aggregate(megafire_perc$area, by=list(Category=megafire_perc$Category), FUN=sum)
 megafire_wedges
 
+megafire_total <- sum(megafire_wedges$x)
+megafire_total
+
+megafire_total <- mutate(megafire_wedges, megafire_perc = megafire_wedges$x/megafire_total)
+
 allfires_wedgebar <- allfire_wedges %>%
   ggplot(aes(x = "", y = area, fill = Category)) + 
   geom_bar(width = 1, stat = "identity") +
