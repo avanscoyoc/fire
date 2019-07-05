@@ -6,10 +6,12 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+library(splitstackshape)
+library(tidyverse)
 ```
 
 ```{r}
+setwd("/Users/Kendall/Desktop/Fire_Oped/fire/analyses")
 fhist<-read_csv("data/landcover_fires_USGS.csv")
 landclass <- read_csv("data/USGS_key.csv")
 structures<- read_csv("data/structures_cost_calfire.csv")
