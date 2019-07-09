@@ -132,6 +132,16 @@ strucutres_bar <- destructive %>%
   theme(legend.title=element_blank())
 strucutres_bar
 
+#15 of the 20 "Top 20 Most Destructive California Wildfires" occur during our data analysis period
+
+#Percentage of Destructive Fires (2000-2018) that were Shrubland
+
+structure_wedges
+structure_total <- sum(structure_wedges$area)
+structure_total
+
+structure_wedges <- mutate(structure_wedges, structure_perc = structure_wedges$area/structure_total)
+
 strucutres_pie <- strucutres_bar + coord_polar("y", start=0)
 strucutres_pie
 

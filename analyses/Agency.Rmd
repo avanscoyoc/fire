@@ -11,6 +11,7 @@ library(tidyverse)
 ```
 
 ```{r}
+setwd("/Users/Kendall/Desktop/Fire_Oped/fire/analyses")
 fhist<-read_csv("data/landcover_fires_USGS.csv")
 landclass <- read_csv("data/USGS_key.csv")
 structures<- read_csv("data/structures_cost_calfire.csv")
@@ -40,41 +41,5 @@ fh <- fh %>%
 #Remove Biscuit Fire (Most of fire occurs in Oregon)
 fh <- fh %>%
   filter(., FIRE_NAME != "BISCUIT")
-
-agency_perc <- fh %>%  
-  mutate(YEARn = as.numeric(YEAR)) %>%
-  group_by(FIRE_NAME, Category, GIS_ACRES, YEARn, AGENCY) %>%
-  left_join(structures) %>%
-  summarise(area = sum(histogram_2)) %>%
-  mutate(area = area * .078 * 2.47) %>%
-  na.omit() 
-
-agency_perc$AGENCY <- factor(agency_perc$AGENCY, levels=c('BLM', 
-                                                           'CCO',
-                                                           'CDF',
-                                                           'DOD',
-                                                           'Local Agency',
-                                                           'LRA',
-                                                           'NPS',
-                                                           'OTH',
-                                                           'State Agency',
-                                                           'USF',
-                                                           'USFS'))
-agency_bar <- agency_perc %>%
-  ggplot(aes(x = "Agency and Land Cover", y = area, fill = AGENCY)) + 
-  geom_bar(width = 1, stat = "identity") +
-  theme_minimal() +
-  theme(legend.title=element_blank())
-
-agency_bar
-
-agency_total_area <- sum(agency_perc$area)
-agency_total_area
-
-agency_wedges <- aggregate(agency_perc$area, by=list(Category=agency_perc$AGENCY), FUN=sum)
-agency_wedges
-
-agency_perc <- mutate(agency_wedges, agency_fire_perc = agency_wedges$x/agency_total_area)
-agency_perc
 ```
 
