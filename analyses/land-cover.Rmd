@@ -13,11 +13,25 @@ library(splitstackshape)
 library(tidyverse)
 ```
 
-```{r}
-fhist<-read_csv("data/landcover_fire_histogram.csv")
-landclass <- read_csv("data/landclass.csv")
 
+```{r}
+files <- dir("data/lc_data")
+
+hist <- list()
+
+for (i in 1:length(files)) {
+  hist[[i]] <- read_csv(paste0("data/lc_data/", files[[i]])) %>%
+  select(FIRE_NAME, GIS_ACRES, YEAR_,YEAR_num, histogram) %>%
+  mutate(histogram = gsub('^.|.$', '', histogram))
+}
+
+fhist <- bind_rows(hist, .id = "column_label") %>%
+  mutate(YEAR_ = replace_na(YEAR_, 2020))
 ```
+```{r}
+landclass <- read_csv("data/USGS_key.csv")
+```
+
 
 ```{r}
 library(splitstackshape)
@@ -25,6 +39,7 @@ library(splitstackshape)
 fh <- fhist %>%
   cSplit("histogram", sep = ",", direction = "long") %>%
   cSplit("histogram", sep = "=", direction = "wide") %>%
+  mutate(histogram_1 = as.numeric(histogram_1)) %>%
   left_join(landclass) 
 
 land_fire<- fh %>%
@@ -32,7 +47,6 @@ land_fire<- fh %>%
   summarise(area = sum(histogram_2)) %>% na.omit() %>%
   ggplot(aes(x=Landcover, y= area )) +
   geom_bar(stat="identity") + coord_flip()
-land_fire
 
 catagory_fire<- fh %>%
   group_by(Category) %>%
@@ -42,31 +56,37 @@ catagory_fire<- fh %>%
   geom_bar(stat="identity") + coord_flip()
 catagory_fire
   
+
+year_fire<- fh %>%
+  group_by(YEAR_) %>%
+  summarise(area = sum(histogram_2) *0.078 *2.47105) %>%
+  na.omit() %>%
+  ggplot(aes(x=YEAR_, y= area )) +
+  geom_bar(stat="identity") + coord_flip()
+year_fire
 ```
 
 ```{r}
 fire_perc<- fh %>%  
-  mutate(YEARn = as.numeric(YEAR)) %>%
-  filter(YEARn>30,
-         GIS_ACRES>75000) %>%
-  group_by(FIRE_NAME, Category, GIS_ACRES, YEARn) %>%
+  group_by(FIRE_NAME, Category, GIS_ACRES, YEAR_) %>%
   summarise(area = sum(histogram_2)) %>%
   mutate(area = area * .078 * 2.47) %>%
+ # filter(area>75000) %>%
   na.omit() %>% 
-  group_by(FIRE_NAME) %>% 
+  group_by(YEAR_) %>% 
   mutate(sumarea = sum(GIS_ACRES)) %>% 
-  arrange(desc(sumarea))
+  arrange(desc(area))
 
 cols <- c("Forest" = "darkgreen", "Grassland" = "#799479", "Shrub" = "#DBA901", "Urban/Agriculture" = "gray") 
 
-calveg_fires<- ggplot(fire_perc, aes(x=reorder(FIRE_NAME, GIS_ACRES), y=area, fill= Category)) + 
+calveg_fires<- ggplot(fire_perc, aes(x= YEAR_, y=area, fill= Category)) + 
   geom_bar(stat="identity") + 
   scale_colour_manual(values = cols, aesthetics = c("colour", "fill")) +
   theme_minimal() +coord_flip() +
-  labs(y= "Area Burned in California (Hectares)", x= "Fire Name", title = "CALVEG 30 meter data") +
-  theme(legend.title=element_blank(), legend.position = c(0.8, 0.2)) +
-  geom_hline(yintercept=100000, linetype="dashed", 
-                color = "red", size=1)
+  labs(y= "Area Burned in California (Hectares)", x= "year", title = "CALVEG 30 meter data") +
+  theme(legend.title=element_blank(), legend.position = c(0.8, 0.2)) 
+  #geom_hline(yintercept=100000, linetype="dashed", 
+               # color = "red", size=1)
 
 ```
 
